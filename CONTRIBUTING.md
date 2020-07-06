@@ -2,12 +2,12 @@
 
 ## Bug Reports
 
-* Ensure that your issue [has not already been reported][1]. It may already be
+- Ensure that your issue [has not already been reported][1]. It may already be
   fixed!
-* Include the steps you carried out to produce the problem.
-* Include the behavior you observed along with the behavior you expected, and
+- Include the steps you carried out to produce the problem.
+- Include the behavior you observed along with the behavior you expected, and
   why you expected it.
-* Include the stack trace and any debugging output.
+- Include the stack trace and any debugging output.
 
 ## Feature Requests
 
@@ -20,19 +20,19 @@ The best way to see a feature added, however, is to submit a pull request.
 
 ## Pull Requests
 
-* Before creating your pull request, it's usually worth asking if the code
+- Before creating your pull request, it's usually worth asking if the code
   you're planning on writing will actually be considered for merging. You can
   do this by [opening an issue][1] and asking. It may also help give the
   maintainers context for when the time comes to review your code.
 
-* Ensure your [commit messages are well-written][2]. This can double as your
+- Ensure your [commit messages are well-written][2]. This can double as your
   pull request message, so it pays to take the time to write a clear message.
 
-* Add tests for your feature. Run them using `npm test`.
+- Add tests for your feature. Run them using `npm test`.
 
-* Verify that your code passes the linter. Run it using `npm run lint`.
+- Verify that your code passes the linter. Run it using `npm run lint`.
 
-* Submit your pull request!
+- Submit your pull request!
 
 All pull requests will be tested against [Travis CI][3], where the following
 commands are run against multiple versions of Node:
@@ -54,4 +54,4 @@ request will save you time having to fix those changes.
 This project adheres to the [Open Code of Conduct][code-of-conduct]. By
 participating, you are expected to honor this code.
 
-[code-of-conduct]: https://github.com/brigade/code-of-conduct
+[code-of-conduct]: https://github.com/samurais/code-of-conduct

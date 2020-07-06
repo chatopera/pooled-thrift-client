@@ -1,10 +1,10 @@
 {
-  "name": "@brigade/pooled-thrift-client",
-  "version": "2.0.0",
+  "name": "@chatopera/thrift-pool",
+  "version": "0.3.0",
   "description": "A Thrift client utilising a pool of service connections and improved error handling/recovery",
   "main": "src/index.js",
   "engines": {
-    "node": ">= 6"
+    "node": ">= 10"
   },
   "scripts": {
     "lint": "eslint .",
@@ -12,26 +12,31 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/brigade/pooled-thrift-client.git"
+    "url": "git+https://github.com/samurais/pooled-thrift-client.git"
   },
   "keywords": [
     "thrift",
     "client",
     "pool"
   ],
-  "author": "Anuj Das",
+  "author": "Anuj Das, Hai Liang Wang",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/brigade/pooled-thrift-client/issues"
+    "url": "https://github.com/samurais/pooled-thrift-client/issues"
   },
-  "homepage": "https://github.com/brigade/pooled-thrift-client#readme",
+  "homepage": "https://github.com/samurais/pooled-thrift-client#readme",
   "dependencies": {
-    "generic-pool": "^3.4.0",
-    "thrift": "^0.11.0"
+    "debug": "^4.1.1",
+    "generic-pool": "^3.7.1",
+    "thrift": "^0.12.0"
   },
   "devDependencies": {
     "eslint": "^4.13.1",
     "eslint-config-brigade": "^7.0.0",
     "jasmine": "^2.9.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   }
 }
