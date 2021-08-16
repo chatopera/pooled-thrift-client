@@ -1,6 +1,7 @@
-const debug = require("debug")("thrift-pool");
+const debug = require("debug")("pthrift");
 const GenericPool = require("generic-pool");
 const Thrift = require("thrift");
+const _ = require("lodash");
 
 const {
   AcquisitionTimeoutError,
@@ -63,7 +64,7 @@ const detachCallbacks = (connection, { onTimeout, onClose, onError }) => {
  *
  * @return {Promise} Resolves to an open connection or an error
  */
-const createThriftConnection = (thriftOptions) => {
+const createThriftConnection = (thriftOptions, clientOptions = {}) => {
   let connection, callbacks;
   return new Promise((resolve, reject) => {
     const { host, port } = thriftOptions;
@@ -82,7 +83,25 @@ const createThriftConnection = (thriftOptions) => {
     .catch((error) => {
       debug(`connection error for thrift[${thriftOptions.role}]`, error);
       detachCallbacks(connection, callbacks);
-      throw error;
+
+      if (
+        error instanceof ConnectionTimeoutError &&
+        _.isFunction(clientOptions.onConnTimeout)
+      ) {
+        clientOptions.onConnTimeout(error);
+      } else if (
+        error instanceof AcquisitionTimeoutError &&
+        _.isFunction(clientOptions.onAcqTimeout)
+      ) {
+        clientOptions.onAcqTimeout(error);
+      } else if (
+        error instanceof ConnectionClosedError &&
+        _.isFunction(clientOptions.onClosedError)
+      ) {
+        clientOptions.onClosedError(error);
+      } else {
+        throw error;
+      }
     });
 };
 
@@ -96,29 +115,49 @@ const createThriftConnection = (thriftOptions) => {
  * @return {Function} A callable taking arguments and returning a Promise for
  *   the RPC response or an error
  */
-const pooledRpc = (TService, rpc, pool) => (...args) => {
-  return pool
-    .acquire()
-    .catch((e) => Promise.reject(new AcquisitionTimeoutError(e.message)))
-    .then((connection) => {
-      let callbacks;
-      return new Promise((resolve, reject) => {
-        callbacks = attachCallbacks(connection, reject);
-        const client = Thrift.createClient(TService, connection);
-        resolve(client[rpc](...args));
-      })
-        .then((response) => {
-          detachCallbacks(connection, callbacks);
-          pool.release(connection);
-          return response;
+const pooledRpc =
+  (TService, rpc, pool, clientOptions = {}) =>
+  (...args) => {
+    return pool
+      .acquire()
+      .catch((e) => Promise.reject(new AcquisitionTimeoutError(e.message)))
+      .then((connection) => {
+        let callbacks;
+        return new Promise((resolve, reject) => {
+          callbacks = attachCallbacks(connection, reject);
+          const client = Thrift.createClient(TService, connection);
+          resolve(client[rpc](...args));
         })
-        .catch((error) => {
-          detachCallbacks(connection, callbacks);
-          pool.release(connection);
-          throw error;
-        });
-    });
-};
+          .then((response) => {
+            detachCallbacks(connection, callbacks);
+            pool.release(connection);
+            return response;
+          })
+          .catch((error) => {
+            detachCallbacks(connection, callbacks);
+            pool.release(connection);
+
+            if (
+              error instanceof ConnectionTimeoutError &&
+              _.isFunction(clientOptions.onConnTimeout)
+            ) {
+              clientOptions.onConnTimeout(error);
+            } else if (
+              error instanceof AcquisitionTimeoutError &&
+              _.isFunction(clientOptions.onAcqTimeout)
+            ) {
+              clientOptions.onAcqTimeout(error);
+            } else if (
+              error instanceof ConnectionClosedError &&
+              _.isFunction(clientOptions.onClosedError)
+            ) {
+              clientOptions.onClosedError(error);
+            } else {
+              throw error;
+            }
+          });
+      });
+  };
 
 /* Default options */
 
@@ -168,10 +207,13 @@ const DEFAULT_THRIFT_OPTIONS = {
  * @param {Object} clientOptions Options for the pooled client
  * @param {Object} clientOptions.poolOptions Options passed directly to GenericPool's constructor; see
  *   https://github.com/coopernurse/node-pool/blob/71fc5582712dc5982d2b3987b84f9fbc93fe8501/lib/PoolOptions.js#L6-L47
+ * @param {Object} clientOptions.onConnTimeout handle client connnect timeout error
+ * @param {Object} clientOptions.onAcqTimeout handle acquire client error
+ * @param {Object} clientOptions.onClosedError handle client closed error
  *
  * @return {Object} A client with methods corresponding to the TService
  */
-module.exports = (TService, thriftOptions, clientOptions) => {
+exports = module.exports = (TService, thriftOptions, clientOptions = {}) => {
   if (!thriftOptions.host || !thriftOptions.port) {
     throw new Error("PooledThriftClient: both host and port must be specified");
   }
@@ -185,7 +227,7 @@ module.exports = (TService, thriftOptions, clientOptions) => {
 
   const pool = GenericPool.createPool(
     {
-      create: () => createThriftConnection(thriftOptions),
+      create: () => createThriftConnection(thriftOptions, clientOptions),
       destroy: (connection) =>
         new Promise((resolve) => resolve(connection.end())),
       validate: (connection) =>
@@ -202,7 +244,7 @@ module.exports = (TService, thriftOptions, clientOptions) => {
       return clientClass.hasOwnProperty(`send_${k}`);
     })
     .reduce((thriftClient, rpc) => {
-      thriftClient[rpc] = pooledRpc(TService, rpc, pool);
+      thriftClient[rpc] = pooledRpc(TService, rpc, pool, clientOptions);
       return thriftClient;
     }, {});
 };

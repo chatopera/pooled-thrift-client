@@ -1,9 +1,13 @@
-# pooled-thrift-client
+# pthrift
 
-[![npm version](https://badge.fury.io/js/%40brigade%2Fpooled-thrift-client.svg)](https://badge.fury.io/js/%40brigade%2Fpooled-thrift-client)
-[![Build Status](https://travis-ci.org/brigade/pooled-thrift-client.svg?branch=master)](https://travis-ci.org/brigade/pooled-thrift-client)
+[![npm version](https://badge.fury.io/js/%40brigade%2Fpthrift.svg)](https://badge.fury.io/js/%40brigade%2Fpthrift)
+[![Build Status](https://travis-ci.org/brigade/pthrift.svg?branch=master)](https://travis-ci.org/brigade/pthrift)
 
-A node Thrift client utilising a pool of service connections and improved error handling/recovery
+Pooled thrift client, a node Thrift client utilising a pool of service connections and improved error handling/recovery
+
+```
+npm install pthrift
+```
 
 ## Features
 
@@ -40,15 +44,20 @@ This will produce JS definitions for your service, which can then be used to cre
 
 ```js
 const CalculatorService = require("./CalculatorService");
-const thriftClient = require("@chatopera/thrift-pool");
+const Pool = require("pthrift");
 
 // host and port are mandatory see other config options in comments
 const host = "127.0.0.1",
   port = 9000;
-const client = thriftClient(
+const client = Pool(
   CalculatorService,
   { host, port },
-  { poolOptions: { max: 5 } }
+  {
+    poolOptions: { max: 5 },
+    onAcqTimeout: (err) => {},
+    onConnTimeout: (err) => {},
+    onClosedError: (err) => {},
+  }
 );
 
 // use the client as you would a regular client, get pooling for free
@@ -66,3 +75,14 @@ Tests can be run using
 ```sh
 npm test
 ```
+
+## License
+
+Copyright (2018-2021) <a href="https://www.chatopera.com/" target="_blank">北京华夏春松科技有限公司</a>
+
+[Apache License Version 2.0](./LICENSE)
+
+[![chatoper banner][co-banner-image]][co-url]
+
+[co-banner-image]: https://static-public.chatopera.com/assets/images/42383104-da925942-8168-11e8-8195-868d5fcec170.png
+[co-url]: https://www.chatopera.com
