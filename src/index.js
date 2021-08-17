@@ -1,6 +1,6 @@
 const debug = require("debug")("pthrift");
 const GenericPool = require("generic-pool");
-const Thrift = require("thrift");
+const Thrift = require("thr1ft");
 const _ = require("lodash");
 
 const {

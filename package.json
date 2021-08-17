@@ -1,6 +1,6 @@
 {
   "name": "pthrift",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Thrift client utilising a pool of service connections and improved error handling/recovery",
   "main": "src/index.js",
   "engines": {
@@ -29,7 +29,8 @@
     "debug": "^4.3.2",
     "generic-pool": "^3.7.1",
     "lodash": "^4.17.21",
-    "thrift": "^0.12.0"
+    "thrift": "0.12.0",
+    "thr1ft": "0.12.1"
   },
   "devDependencies": {
     "eslint": "^4.13.1",
